@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <title>AI Translate</title>
+</head>
+
+<body>
+  <h1>Translate</h1>
+
+  <div class="container">
+    <div class="top-bar">
+      <select id="model">
+        <option value="Deepl">Safe</option>
+        <option value="ChatGPT">Adventurous</option>
+        <option value="Experimental" selected="selected">Experimental</option>
+      </select>
+      <button id="translateBtn">Translate</button>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div class="editor-wrapper">
+      <div class="editor">
+        <header>
+          <span>Source</span>
+          <select id="inputLang">
+            <option value="English">English</option>
+          </select>
+        </header>
+        <div id="phrase" class="text-editor" contenteditable="true" spellcheck="true">Is A Midsummer Night's Dream based on a play?
+        </div>
+      </div>
+
+      <div class="editor">
+        <header>
+          <span>Translation</span>
+          <select id="outputLang">
+            <option value="French">French</option>
+            <option value="Italian">Italian</option>
+            <option value="Romanian">Romanian</option>
+            <option value="Chinese">Chinese</option>
+          </select>
+        </header>
+        <div id="translation" class="text-editor"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const translateBtn = document.getElementById('translateBtn');
+    const message = document.getElementById('message');
+
+    translateBtn.addEventListener('click', async () => {
+      message.textContent = 'Translating…';
+
+      const endpoint = "http://127.0.0.1:5000/translate";
+
+      const phrases = document.getElementById('phrase').innerText.split('\n');
+      sources = phrases.filter(phrase => phrase.trim() !== '')
+                            .map(phrase => phrase.trim());
+
+      const source_lang = document.getElementById('inputLang').value;
+      const target_lang = document.getElementById('outputLang').value;
+      const engine = document.getElementById('model').value;
+
+//      const req = `${endpoint}?source_lang=${source_lang}&target_lang=${target_lang}&phrase=${encodeURIComponent(phrase)}&engine=${engine}`;
+      console.log("translating " + sources);
+      try {
+        const resp = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+              'Content-Type':'application/json',
+              'Accept':'application/json',
+          },
+          body: JSON.stringify({ engine, source_lang, target_lang, sources})
+        });
+        const data = await resp.json();
+        let word = "gollum"
+        const regex = new RegExp(word, 'gi');
+        console.log(`Received: ${data.translated.toString()}`);
+        newPhrases = data.translated.map(text => text.replace(regex, '<mark>$&</mark>'));
+        document.getElementById('translation').innerHTML = newPhrases.join('<br>');
+        //console.log(`Received: ${data.translated}`);
+        //document.getElementById('translation').innerText = data.translated;
+        message.textContent = '';
+
+      } catch (err) {
+        console.error(err);
+        message.textContent = 'Something went wrong';
+      }
+    });
+    phrase.addEventListener('paste', () => {
+      e.preventDefault();
+      const plainText = e.clipboardData.getData('text/plain');
+      document.execCommand('insertText', false, plainText);
+    });
+
+  </script>
+</body>
+</html>
