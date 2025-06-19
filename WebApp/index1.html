@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" type="text/css" href="styles.css">
   <title>AI Translate</title>
 </head>
@@ -13,8 +13,11 @@
     <div class="top-bar">
       <select id="model">
         <option value="Deepl">Safe</option>
-        <option value="ChatGPT">Adventurous</option>
-        <option value="Experimental" selected="selected">Experimental</option>
+        <option value="Gemini">Adventurous</option>
+        <option value="Experimental">Experimental</option>
+        <option value="Entity-Aware" selected="selected">Entity-Aware</option>
+
+        
       </select>
       <button id="translateBtn">Translate</button>
     </div>
@@ -37,10 +40,13 @@
         <header>
           <span>Translation</span>
           <select id="outputLang">
-            <option value="French">French</option>
+            <option value="Arabic">Arabic</option>
+            <option value="German">German</option>
+            <option value="Spanish">Spanish</option>
+            <option value="French" selected="selected">French</option>
             <option value="Italian">Italian</option>
+            <option value="Japanese">Japanese</option>
             <option value="Romanian">Romanian</option>
-            <option value="Chinese">Chinese</option>
           </select>
         </header>
         <div id="translation" class="text-editor"></div>
@@ -77,11 +83,24 @@
           body: JSON.stringify({ engine, source_lang, target_lang, sources})
         });
         const data = await resp.json();
-        let word = "gollum"
-        const regex = new RegExp(word, 'gi');
         console.log(`Received: ${data.translated.toString()}`);
-        newPhrases = data.translated.map(text => text.replace(regex, '<mark>$&</mark>'));
-        document.getElementById('translation').innerHTML = newPhrases.join('<br>');
+
+        for (sentence_id = 0;  sentence_id < data.entities.length; sentence_id++)
+        {
+          //console.log(`Processing: ${sentence_id}`);
+          for (entity_id = 0;  entity_id < data.entities[sentence_id].length; entity_id++)
+          {
+            const entity = data.entities[sentence_id][entity_id];
+            //console.log(`Processing: ${entity}`);
+            if (entity === '') 
+              continue;
+            const regex = new RegExp(entity.replace("’", "'"), 'gi');
+            data.translated[sentence_id] = data.translated[sentence_id].replace("’", "'").replace(regex, '<mark>$&</mark>');
+          }
+        }
+        console.log(`proc: ${data.translated.toString()}`);
+
+        document.getElementById('translation').innerHTML = data.translated.join('<br>');
         //console.log(`Received: ${data.translated}`);
         //document.getElementById('translation').innerText = data.translated;
         message.textContent = '';
