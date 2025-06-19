@@ -1,0 +1,16 @@
+{"id": "ca91bd40", "source_locale": "en", "target_locale": "ja", "source": "North America is a large continent.", "target": "北アメリカは大きな大陸です。", "entities": "Q49", "from": "generated"}
+{"id": "bf2f4a92", "source_locale": "en", "target_locale": "ja", "source": "The Titanic was a famous ship.", "target": "タイタニックは有名な船でした。", "entities": "Q44578", "from": "generated"}
+{"id": "fc3d4165", "source_locale": "en", "target_locale": "ja", "source": "I'm going to Los Angeles next week.", "target": "来週、ロサンゼルスに行きます。", "entities": "Q65", "from": "generated"}
+{"id": "3f20f875", "source_locale": "en", "target_locale": "ja", "source": "I'm currently reading A Song of Ice and Fire.", "target": "私は今、氷と炎の歌を読んでいます。", "entities": "Q45875", "from": "generated"}
+{"id": "086a00d7", "source_locale": "en", "target_locale": "ja", "source": "The governor announced a new plan to improve education.", "target": "州知事は教育を改善するための新しい計画を発表しました。", "entities": "Q889821", "from": "generated"}
+{"id": "d0f47e2f", "source_locale": "en", "target_locale": "ja", "source": "I visited the Lincoln Memorial last summer.", "target": "私は去年の夏にリンカーン記念館を訪れました。", "entities": "Q213559", "from": "generated"}
+{"id": "45f52ce2", "source_locale": "en", "target_locale": "ja", "source": "Bernie Sanders supports Medicare for All.", "target": "バーニー・サンダースはメディケア・フォー・オールを支持しています。", "entities": "Q359442", "from": "generated"}
+{"id": "737316b0", "source_locale": "en", "target_locale": "ja", "source": "Stephenie Meyer is the author of the Twilight series.", "target": "ステファニー・メイヤーはトワイライトシリーズの著者です。", "entities": "Q160219", "from": "generated"}
+{"id": "368d0bbc", "source_locale": "en", "target_locale": "ja", "source": "Edward Cullen is a vampire.", "target": "エドワード・カレンは吸血鬼です。", "entities": "Q191527", "from": "generated"}
+{"id": "1061a13c", "source_locale": "en", "target_locale": "ja", "source": "The Mississippi River is a major waterway in the United States.", "target": "ミシシッピ川はアメリカ合衆国の主要な水路です。", "entities": "Q1497", "from": "generated"}
+{"id": "d2acc05d", "source_locale": "en", "target_locale": "ja", "source": "I'm planning a trip to Hawaii next year.", "target": "来年ハワイ州への旅行を計画しています。", "entities": "Q782", "from": "generated"}
+{"id": "ce151cac", "source_locale": "en", "target_locale": "ja", "source": "The boat sailed smoothly across the lake.", "target": "ボートは湖を滑るように進んだ。", "entities": "Q23397", "from": "generated"}
+{"id": "1aa206c9", "source_locale": "en", "target_locale": "ja", "source": "I want to visit Texas someday.", "target": "いつかテキサス州に行ってみたいです。", "entities": "Q1439", "from": "generated"}
+{"id": "8d6440c5", "source_locale": "en", "target_locale": "ja", "source": "The Los Angeles Dodgers won the World Series in 2020.", "target": "ロサンゼルス・ドジャースは2020年のワールドシリーズで優勝しました。", "entities": "Q334634", "from": "generated"}
+{"id": "5f265fb8", "source_locale": "en", "target_locale": "ja", "source": "The Dodgers won the World Series in 2020.", "target": "ドジャースは2020年にワールドシリーズで優勝しました。", "entities": "Q265538", "from": "generated"}
+{"id": "9f644031", "source_locale": "en", "target_locale": "ja", "source": "Argentina is famous for its tango and football.", "target": "アルゼンチンはタンゴとサッカーで有名です。", "entities": "Q414", "from": "generated"}
