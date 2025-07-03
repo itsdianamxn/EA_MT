@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="icon.png" type="image/png" />
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <title>AI Translate</title>
+</head>
+
+<body>
+  <h1>Translate</h1>
+
+  <div class="container">
+    <div class="top-bar">
+      <select id="model">
+        <option value="Deepl">Safe</option>
+        <option value="Gemini">Adventurous</option>
+        <option id="experimental" value="Experimental">Experimental</option>
+        <option value="Entity-Aware" selected="selected">Entity-Aware</option>
+
+        
+      </select>
+      <button id="translateBtn">Translate</button>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div class="editor-wrapper">
+      <div class="editor">
+        <header>
+          <span>Source</span>
+          <select id="inputLang">
+            <option value="English">English</option>
+          </select>
+        </header>
+        <div id="phrase" class="text-editor" contenteditable="true" spellcheck="true">What role does Hermione Granger play in the story?</div>
+      </div>
+
+      <div class="editor">
+        <header>
+          <span>Translation</span>
+          <select id="outputLang">
+            <option value="Arabic">Arabic</option>
+            <option value="German">German</option>
+            <option value="Spanish">Spanish</option>
+            <option value="French" selected="selected">French</option>
+            <option value="Italian">Italian</option>
+            <option value="Japanese">Japanese</option>
+            <option id="romanian" value="Romanian">Romanian</option>
+          </select>
+        </header>
+        <div id="translation" class="text-editor"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const translateBtn = document.getElementById('translateBtn');
+    const message = document.getElementById('message');
+
+    translateBtn.addEventListener('click', async () => {
+      message.textContent = 'Translating…';
+
+      const endpoint = "http://127.0.0.1:5000/translate";
+
+      const phrases = document.getElementById('phrase').innerText.split('\n');
+      sources = phrases.filter(phrase => phrase.trim() !== '')
+                            .map(phrase => phrase.trim());
+
+      const source_lang = document.getElementById('inputLang').value;
+      const target_lang = document.getElementById('outputLang').value;
+      const engine = document.getElementById('model').value;
+
+//      const req = `${endpoint}?source_lang=${source_lang}&target_lang=${target_lang}&phrase=${encodeURIComponent(phrase)}&engine=${engine}`;
+      console.log("translating " + sources);
+      try {
+        const resp = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+              'Content-Type':'application/json',
+              'Accept':'application/json',
+          },
+          body: JSON.stringify({ engine, source_lang, target_lang, sources})
+        });
+        const data = await resp.json();
+        console.log(`Received: ${data.translated.toString()}`);
+        let html = '';
+        for (sentence_id = 0;  sentence_id < data.translated.length; sentence_id++)
+        {
+          
+          if (sentence_id != 0)
+            html += '<br><br>';
+          for (let i = 0; i < data.translated[sentence_id].length; i++) {
+            if (Array.isArray(data.entities?.[sentence_id]))
+            {
+              for (entity_id = 0;  entity_id < data.entities[sentence_id].length; entity_id++)
+              {
+                const entity = data.entities[sentence_id][entity_id];
+                //console.log(`Processing: ${entity}`);
+                if (entity === '') 
+                  continue;
+                const regex = new RegExp(entity.replace("’", "'"), 'gi');
+                data.translated[sentence_id][i] = data.translated[sentence_id][i].replace("’", "'").replace(regex, '<mark>$&</mark>');
+              }
+            }
+            if (i === 0) {
+              html += data.translated[sentence_id][i];
+            } else {
+              html += '<br> <span class = "alt_translation">' + data.translated[sentence_id][i] + '</span>';
+            }
+          }
+        }
+        console.log(`proc: ${html}`);
+
+        document.getElementById('translation').innerHTML = html;
+        //console.log(`Received: ${data.translated}`);
+        //document.getElementById('translation').innerText = data.translated;
+        message.textContent = '';
+
+      } catch (err) {
+        console.error(err);
+        message.textContent = 'Something went wrong';
+      }
+    });
+    phrase.addEventListener('paste', () => {
+      e.preventDefault();
+      const plainText = e.clipboardData.getData('text/plain');
+      document.execCommand('insertText', false, plainText);
+    });
+    document.getElementById('model').addEventListener('change', (event) => {
+      if (event.target.value === "Experimental") {
+        document.getElementById('romanian').style.display = 'none';
+      } else {
+        document.getElementById('romanian').style.display = 'block';
+      }
+    });
+
+  </script>
+</body>
+</html>

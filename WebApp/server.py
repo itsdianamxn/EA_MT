@@ -6,8 +6,12 @@ from transformers import AutoTokenizer
 from flask import Flask, jsonify, request, Response
 from google import genai
 import deepl
-
+import os
 client = genai.Client()
+
+ROOT_PATH = "C:/Users/diana/Desktop/Anul III/Licenta/PROIECT/WebApp/static/"
+
+
 languages = {"Arabic": "ar",
              "French": "fr",
              "Italian": "it",
@@ -23,6 +27,7 @@ model_args = {
     "use_cuda": torch.cuda.is_available(),
     "max_length": 128,
     "eval_batch_size": 8,
+    "num_return_sequences" : 2,
     "num_beams": 3,
     "fp16": False
 }
@@ -55,13 +60,33 @@ def load_model():
     return model
     #entity_mapping = [] #load_entity_mapping("C:/Users/diana/Desktop/Anul III/Licenta/SemEval/wikidata_labels_en_fr.jsonl")
 
+def normalize_path(path: str) -> str:
+    # Expand user (~) and environment variables
+    path = os.path.expanduser(path)
+    path = os.path.expandvars(path)
+    
+    # Normalize path (remove redundant separators and up-level references)
+    path = os.path.normpath(path)
+    
+    # Convert to absolute path (optional)
+    path = os.path.abspath(path)
+    
+    return path
+normalized_root =  normalize_path(ROOT_PATH)
+
 app = Flask(__name__)
 
 @app.route('/webapp/<path:path>', methods=['GET'])
 def webapp(path):
-    print(request.path)
+    print (path)
 
-    full_path = "C:/Users/diana/Desktop/Anul III/Licenta/PROIECT/WebApp/" + path
+    full_path = ROOT_PATH + path
+    print (normalize_path(full_path))
+    if normalize_path(full_path).startswith(normalized_root) is False:
+        return Response("Forbidden", status=403)
+    if not os.path.exists(full_path):
+        return Response("File not found", status=404)
+    
     with open(full_path, 'rb') as f:
         content = f.read()
         if path.endswith(".css"):
@@ -88,11 +113,14 @@ def translate():
         translations.append(input)
     print("Input for model:", translations)
     if engine == "Deepl":
-        auth_key = "9e2244de-6236-45fc-afc8-a6a8e55b473b:fx"
+        auth_key = os.environ.get('DEEPL_API_KEY')
         translator = deepl.Translator(auth_key)
 
         prediction = translator.translate_text("\n".join(sources), target_lang=target_lang[0:2].upper(), source_lang=source_lang[0:2].upper())
         prediction = prediction.text.split('\n')
+
+        for i in range(len(prediction)):
+            prediction[i] = [prediction[i]]
     elif engine == "Gemini":
         prompt = (f"You are an expert translator. Translate from {source_lang} to {target_lang}. " +
                 f"Generate the translation for the sentence without any additional explanations and without the {source_lang} text, " +
@@ -109,7 +137,7 @@ def translate():
         out = response.text.split('\n')
         print("gemini response:", out)
         prediction = []
-        prediction.append(out[0])
+        prediction.append([out[0]])
         idx = out[1].find('Entities: ')
         if idx != -1:
             entities_str = out[1][idx + len('Entities: '):]
@@ -122,20 +150,23 @@ def translate():
         print("Entity-aware prediction:", ea_prediction)
         prediction = []
         for pred in ea_prediction:
-            idx = pred.find(', "entities":[')
-            if idx != -1:
-                entities_str = pred[idx + 1 + len(', "entities":['):-2]
-                if entities_str != "":
-                    print("Entities string:", entities_str)
-                    entities_list = entities_str.split('", "')
-                    print("Entities list:", entities_list)
-                    entities.append(entities_list)
-            prediction.append(pred[:idx])
+            entities_list = set()
+            prediction_list = []
+            for sentence in pred:
+                idx = sentence.find(', "entities":[')
+                if idx != -1:
+                    entities_str = sentence[idx + 1 + len(', "entities":['):-2]
+                    if entities_str != "":
+                        print("Entities string:", entities_str)
+                        entities_list = entities_list.union(entities_str.split('", "'))
+                        print("Entities list:", entities_list)
+                prediction_list.append(sentence[:idx])
+            entities.append(list(entities_list))
+            prediction.append(prediction_list)
 
     elif engine == "Experimental":
         prediction = model.predict(translations)
-
-
+    
     print("Responding with prediction:", prediction)
     return jsonify({'source_lang': source_lang, 'target_lang': target_lang, 'source': source, 'translated' : prediction, 'entities': entities})
 

@@ -1,5 +1,6 @@
 import json
 import requests
+import os
 def extract_ids(path, ):
     ids = set(())
     with open(path, "r", encoding="utf-8") as f:
@@ -14,7 +15,16 @@ def extract_ids(path, ):
     return list(ids)
 
 def extract_data(ids, lang_source, lang_target):
-    with open(f"wikidata_labels_{lang_source}_{lang_target}.jsonl", "a", encoding="utf-8") as f:
+    out_path = f"wikidata_labels_{lang_source}_{lang_target}_train.jsonl"
+    seen = set()
+    if os.path.exists(out_path):
+        with open(out_path, encoding="utf‑8") as f:
+            for line in f:
+                try:
+                    seen.add(json.loads(line)["id"])
+                except Exception:
+                    pass
+    with open(out_path, "a", encoding="utf-8") as f:
         for i in range(0, len(ids), 50):
             batch = ids[i:i + 50]
             print(f"Processing batch {i // 50 + 1} with {batch}")
@@ -44,6 +54,13 @@ def extract_data(ids, lang_source, lang_target):
 
 if __name__ == '__main__':
 
-    path = "C:/Users/diana/Desktop/Anul III/Licenta/PROIECT/data/references/validation/fr_FR.jsonl"
+    #path = "C:/Users/diana/Desktop/Anul III/Licenta/PROIECT/data/references/validation/fr_FR.jsonl"
+    #path = "C:/Users/diana/Desktop/Anul III/Licenta/PROIECT/data/references/test/fr_FR.jsonl"
+    path = "C:/Users/diana/Desktop/Anul III/Licenta/PROIECT/data/references/test/it_IT.jsonl"
+
+    #path = "C:/Users/diana/Desktop/Anul III/Licenta/PROIECT/data/semeval/train/it/train.jsonl"
+
+
     ids = extract_ids(path)
-    extract_data(ids, "en", "fr")
+    #extract_data(ids, "en", "fr")
+    extract_data(ids, "en", "it")
